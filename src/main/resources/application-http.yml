@@ -1,0 +1,27 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+http:
+  query:
+    base-url: http://localhost:10082
+    read-timeout: 3000
+    connection-timeout: 3000
+    max-connection-count: 100
+    max-connection-per-route: 100
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+http:
+  query:
+    base-url: http://dev-closememo-query.default.svc.cluster.local:10082
+    read-timeout: 3000
+    connection-timeout: 3000
+    max-connection-count: 100
+    max-connection-per-route: 100

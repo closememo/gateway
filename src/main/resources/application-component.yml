@@ -1,0 +1,23 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+command:
+  uri: http://localhost:10081
+
+query:
+  uri: http://localhost:10082
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+command:
+  uri: http://dev-closememo-command.default.svc.cluster.local:10081
+
+query:
+  uri: http://dev-closememo-query.default.svc.cluster.local:10082

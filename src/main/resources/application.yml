@@ -1,0 +1,22 @@
+spring:
+  profiles:
+    active: local
+    include: component, http, logging, secret
+  cloud:
+    gateway:
+      routes:
+        - id: command
+          uri: ${command.uri}
+          predicates:
+            - Path=/command/**
+          filters:
+            - Authentication
+        - id: query
+          uri: ${query.uri}
+          predicates:
+            - Path=/query/**
+          filters:
+            - Authentication
+
+server:
+  port: 10080
