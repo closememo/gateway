@@ -1,4 +1,4 @@
-FROM reg.bitgadak.com/base:0.1
+FROM reg.bitgadak.com/closememo/gateway-base:0.1
 
 EXPOSE 10080
 
