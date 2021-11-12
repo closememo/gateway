@@ -21,3 +21,16 @@ command:
 
 query:
   uri: http://dev-closememo-query.default.svc.cluster.local:10082
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: real
+
+command:
+  uri: http://closememo-command.default.svc.cluster.local:10081
+
+query:
+  uri: http://closememo-query.default.svc.cluster.local:10082
