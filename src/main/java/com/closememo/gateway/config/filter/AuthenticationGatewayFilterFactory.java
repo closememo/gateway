@@ -1,5 +1,6 @@
 package com.closememo.gateway.config.filter;
 
+import com.closememo.gateway.config.cache.EhCacheConfig;
 import com.closememo.gateway.infra.model.Account;
 import com.closememo.gateway.infra.model.AccountId;
 import com.closememo.gateway.infra.model.BusinessException;
@@ -7,13 +8,18 @@ import com.closememo.gateway.config.filter.AuthenticationGatewayFilterFactory.Co
 import com.closememo.gateway.infra.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.ehcache.Cache;
+import org.ehcache.CacheManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
+import reactor.cache.CacheMono;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Signal;
 
 @Slf4j
 @Component
@@ -24,12 +30,16 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
   private static final String X_ACCOUNT_ROLE_HEADER_NAME = "X-Account-Roles";
 
   private final AccountService accountService;
+  private final CacheManager ehCacheManager;
   private final String activeProfiles;
 
-  public AuthenticationGatewayFilterFactory(AccountService accountService,
+  public AuthenticationGatewayFilterFactory(
+      AccountService accountService,
+      @Qualifier("ehCacheManager") CacheManager ehCacheManager,
       @Value("${spring.profiles.active}") String activeProfiles) {
     super(Config.class);
     this.accountService = accountService;
+    this.ehCacheManager = ehCacheManager;
     this.activeProfiles = activeProfiles;
   }
 
@@ -71,7 +81,18 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
       return Mono.empty();
     }
 
-    return accountService.getAccountByToken(accessToken, syncToken);
+    Cache<String, Account> cache = ehCacheManager
+        .getCache(EhCacheConfig.ACCOUNT_CACHE_NAME, String.class, Account.class);
+
+    return CacheMono
+        .lookup(key -> Mono.justOrEmpty(cache.get(key)).map(Signal::next), accessToken)
+        .onCacheMissResume(() -> accountService.getAccountByToken(accessToken, syncToken))
+        .andWriteWith((key, signal) ->
+            Mono.fromRunnable(() -> {
+              if (!signal.isOnError() && signal.get() != null) {
+                cache.put(accessToken, signal.get());
+              }
+            }));
   }
 
   private String getBypassAccountId(@NonNull ServerHttpRequest request) {
