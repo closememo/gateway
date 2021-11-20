@@ -43,5 +43,17 @@ pipeline {
                 }
             }
         }
+        state('Trigger changing manifest job (dev)') {
+            when {
+                branch 'master'
+            }
+            steps {
+                build job: 'closememo-deploy-trigger', parameters: [
+                        string(name: 'component' value: 'gateway')
+                        string(name: 'phase', value: 'dev')
+                        string(name: 'tag', value: NOW)
+                    ]
+            }
+        }
     }
 }
