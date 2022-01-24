@@ -75,7 +75,6 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
     }
 
     String accessToken = request.getHeaders().getFirst(TokenHeaders.ACCESS_TOKEN.getHeaderName());
-    String syncToken = request.getHeaders().getFirst(TokenHeaders.SYNC_TOKEN.getHeaderName());
 
     if (StringUtils.isBlank(accessToken)) {
       return Mono.empty();
@@ -86,7 +85,7 @@ public class AuthenticationGatewayFilterFactory extends AbstractGatewayFilterFac
 
     return CacheMono
         .lookup(key -> Mono.justOrEmpty(cache.get(key)).map(Signal::next), accessToken)
-        .onCacheMissResume(() -> accountService.getAccountByToken(accessToken, syncToken))
+        .onCacheMissResume(() -> accountService.getAccountByToken(accessToken))
         .andWriteWith((key, signal) ->
             Mono.fromRunnable(() -> {
               if (!signal.isOnError() && signal.get() != null) {

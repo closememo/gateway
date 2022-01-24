@@ -5,7 +5,6 @@ import lombok.Getter;
 @Getter
 public enum TokenHeaders {
   ACCESS_TOKEN("X-ACCESS-TOKEN", "로그인 토큰"),
-  SYNC_TOKEN("X-SYNC-TOKEN", "동기화 토큰"),
   ;
 
   private final String headerName;

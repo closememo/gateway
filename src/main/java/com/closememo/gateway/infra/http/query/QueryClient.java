@@ -71,13 +71,12 @@ public class QueryClient {
         });
   }
 
-  public Mono<Account> getAccountByToken(String accessToken, String syncToken) {
+  public Mono<Account> getAccountByToken(String accessToken) {
     return webClient
         .get()
         .uri(uriBuilder -> uriBuilder
-            .path("/query/system/account-by-tokens")
+            .path("/query/system/account-by-token")
             .queryParam("accessToken", accessToken)
-            .queryParam("syncToken", syncToken)
             .build())
         .retrieve()
         .bodyToMono(Account.class)

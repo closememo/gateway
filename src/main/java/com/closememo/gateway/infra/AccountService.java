@@ -24,11 +24,11 @@ public class AccountService {
     return queryClient.getAccountById(accountId);
   }
 
-  public Mono<Account> getAccountByToken(String accessToken, String syncToken) {
+  public Mono<Account> getAccountByToken(String accessToken) {
     if (StringUtils.isEmpty(accessToken)) {
       return Mono.empty();
     }
 
-    return queryClient.getAccountByToken(accessToken, syncToken);
+    return queryClient.getAccountByToken(accessToken);
   }
 }
