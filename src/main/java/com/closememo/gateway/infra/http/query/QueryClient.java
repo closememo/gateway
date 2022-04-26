@@ -35,11 +35,11 @@ public class QueryClient {
         .defaultHeader("X-SYSTEM-KEY", systemKey)
         .clientConnector(new ReactorClientHttpConnector(httpClient))
         .filter((request, next) -> {
-          log.info("HTTP Method : {}", request.method());
-          log.info("URL : {}", request.url());
+          log.debug("HTTP Method : {}", request.method());
+          log.debug("URL : {}", request.url());
           request.headers().forEach((name, values) ->
               values.forEach((value) ->
-                  log.info("HEADER : {}={}", name, value)));
+                  log.debug("HEADER : {}={}", name, value)));
           return next.exchange(request);
         })
         .filter(ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
