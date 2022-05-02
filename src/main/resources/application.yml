@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: gateway
   profiles:
     active: local
     include: component, http, logging, secret
