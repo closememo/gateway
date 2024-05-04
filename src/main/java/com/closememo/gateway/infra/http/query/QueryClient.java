@@ -7,6 +7,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
@@ -43,15 +44,14 @@ public class QueryClient {
           return next.exchange(request);
         })
         .filter(ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-          if (clientResponse.statusCode().isError()) {
-            if (clientResponse.statusCode().is5xxServerError()) {
+          HttpStatus status = HttpStatus.valueOf(clientResponse.statusCode().value());
+          if (status.isError()) {
+            if (status.is5xxServerError()) {
               log.error(String
-                  .format("[FAIL] HTTP Status:%s(%d)", clientResponse.statusCode().name(),
-                      clientResponse.rawStatusCode()));
+                  .format("[FAIL] HTTP Status:%s(%d)", status.name(), status.value()));
             } else {
               log.warn(String
-                  .format("[FAIL] HTTP Status:%s(%d)", clientResponse.statusCode().name(),
-                      clientResponse.rawStatusCode()));
+                  .format("[FAIL] HTTP Status:%s(%d)", status.name(), status.value()));
             }
           }
           return Mono.just(clientResponse);
